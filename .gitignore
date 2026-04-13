@@ -5,6 +5,8 @@
 
 *.gguf
 
+.cache*
+
 .idea/
 cmake-build-*/
 

@@ -23,7 +23,13 @@ add_executable(DSI-Project
         src/llm.cpp
         src/llm.h
         src/utilities/math.cpp
-        src/utilities/math.h)
+        src/utilities/math.h
+        src/handling/Drafter.cpp
+        src/handling/Drafter.h
+        src/handling/Reviewer.cpp
+        src/handling/Reviewer.h
+        src/main.cpp
+        src/constants.h)
 
 find_package(OpenMP REQUIRED)
 
