@@ -18,22 +18,31 @@ public:
     ~LLM();
 
     /* Tokenize a string and decode its tokens */
-    std::vector<int> tokenize_string(const std::string& text);
+    std::vector<int> tokenize_string(const std::string& text) const;
 
-    /* Place a single token into the KV cache */
-    void tkn_to_kv_cache(int tkn_id);
-
-    /* Float vector, index i stores probability of token i being next */
-    std::vector<float> get_tkn_probabilities();
-
-    /* Get next generated token */
-    int get_next_tkn_id();
 
     /* Converts token index to its string */
-    std::string& tkn_id_to_str(int tkn_id);
+    std::string tkn_id_to_str(int tkn_id) const;
 
-    /* Removes last n tokens from the KV cache */
-    void wipe_last_n_tkns_kv_cache(int n);
+
+    /* Float vector, index i stores probability of token i being next */
+    std::vector<float> get_tkn_probabilities() const;
+
+
+    /* Returns generated token id but does not add it in */
+    int get_next_tkn() const;
+
+
+    /* Removes last n tokens from context */
+    void wipe_last_n_tkns(int n);
+
+
+    /* Place a single token into context */
+    void add_tkn(int tkn_id);
+
+
+    /* Adds the list of tokens into end of context */
+    void add_tkns(std::vector<int>& tkn_ids);
 
 
 private:
