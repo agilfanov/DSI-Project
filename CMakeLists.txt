@@ -19,8 +19,12 @@ include_directories(/opt/homebrew/opt/llvm/include)
 link_directories(/opt/homebrew/lib)
 link_directories(/opt/homebrew/opt/llvm/lib)
 
-add_executable(DSI-Project src/test.cpp)
+add_executable(DSI-Project
+        src/llm.cpp
+        src/llm.h
+        src/utilities/math.cpp
+        src/utilities/math.h)
 
 find_package(OpenMP REQUIRED)
 
-target_link_libraries(DSI-Project PRIVATE llama OpenMP::OpenMP_CXX)
+target_link_libraries(DSI-Project PRIVATE llama ggml OpenMP::OpenMP_CXX)
