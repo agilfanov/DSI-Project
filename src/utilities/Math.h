@@ -13,6 +13,8 @@ class Math {
 
 public:
 
+    static float random_float();
+
     static int random_ind(int sz);
 
     static void softmax(std::vector<float>& vec);

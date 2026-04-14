@@ -8,10 +8,14 @@
 #include <omp.h>
 
 
-int Math::random_ind(const int sz) {
+float Math::random_float() {
     static thread_local std::mt19937 gen(std::random_device{}());
-    std::uniform_int_distribution<int> dist(0, sz - 1);
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
     return dist(gen);
+}
+
+int Math::random_ind(const int sz) {
+    return static_cast<int>(random_float() * sz);
 }
 
 /* Both of the softmaxes modify the vector in place*/
@@ -46,7 +50,7 @@ void Math::parallel_softmax(std::vector<float>& vec) {
     const size_t n = vec.size();
     float* data = vec.data();
 
-    /* Find the max value for numerical stability */
+    /* Find the max value so that exp values do not get too big */
     float max_val = data[0];
     #pragma omp parallel
     {

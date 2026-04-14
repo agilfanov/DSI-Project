@@ -24,13 +24,11 @@ public:
     /* Converts token index to its string */
     std::string tkn_id_to_str(int tkn_id) const;
 
+    /* Returns a unique ptr to a float vector representing the probabilities */
+    std::unique_ptr<std::vector<float>> get_tkn_probabilities() const;
 
-    /* Float vector, index i stores probability of token i being next */
-    std::vector<float> get_tkn_probabilities() const;
-
-
-    /* Returns generated token id but does not add it in */
-    int get_next_tkn() const;
+    /* Just runs the random choosing to pick one, does not add into context though */
+    std::pair<int, float> choose_token_and_its_prob(const std::unique_ptr<std::vector<float>>& probabilities) const;
 
 
     /* Removes last n tokens from context */
@@ -42,17 +40,20 @@ public:
 
 
     /* Adds the list of tokens into end of context */
-    void add_tkns(std::vector<int>& tkn_ids);
+    void add_tkns(const std::vector<int>& tkn_ids);
 
 
 private:
-
-    std::vector<float> get_next_raw_logits();
 
     llama_model* model;
     llama_context* ctx;
     const llama_vocab* vocab;
     int kv_ind; /* next write position in the KV cache */
+    int sz_vocab;
+
+
+
+
 };
 
 

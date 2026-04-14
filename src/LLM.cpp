@@ -1,10 +1,10 @@
 //
 // Created by Arthur Gilfanov on 4/12/26.
 //
-
 #include "LLM.h"
 #include "constants.h"
 #include "ggml-backend.h"
+#include "utilities/Math.h"
 
 LLM::LLM(const std::string& model_gguf_path) {
     model = nullptr;
@@ -20,6 +20,7 @@ LLM::LLM(const std::string& model_gguf_path) {
     model = llama_model_load_from_file(model_gguf_path.c_str(), model_params);
 
     vocab = llama_model_get_vocab(model);
+    sz_vocab = llama_vocab_n_tokens(vocab);
 
     llama_context_params ctx_params = llama_context_default_params();
     ctx_params.n_ctx   = LLM_CONTEXT_SIZE;
@@ -47,7 +48,36 @@ std::string LLM::tkn_id_to_str(const int tkn_id) const {
 }
 
 
+std::unique_ptr<std::vector<float>> LLM::get_tkn_probabilities() const {
+    if (kv_ind == 0) return nullptr;
 
+    float* logits = llama_get_logits_ith(ctx, -1);
+    auto raw_probabilities = std::make_unique<std::vector<float>>(logits, logits + sz_vocab);
+    Math::parallel_softmax(*raw_probabilities);
+    return raw_probabilities;
+}
+
+std::pair<int, float> LLM::choose_token_and_its_prob(const std::unique_ptr<std::vector<float>>& probabilities) const {
+    float r = Math::random_float();
+    float cumulative = 0.0f;
+    for (int i = 0; i < sz_vocab; i++) {
+        cumulative += (*probabilities)[i];
+        if (r <= cumulative) return {i, (*probabilities)[i]};
+    }
+    return {sz_vocab - 1, (*probabilities)[sz_vocab - 1]};
+}
+
+void LLM::wipe_last_n_tkns(int n) {
+
+}
+
+void LLM::add_tkn(int tkn_id) {
+
+}
+
+void LLM::add_tkns(const std::vector<int>& tkn_ids) {
+
+}
 
 LLM::~LLM() {
     if (ctx)   llama_free(ctx);
