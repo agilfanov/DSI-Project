@@ -32,5 +32,6 @@ add_executable(DSI-Project
         src/constants.h)
 
 find_package(OpenMP REQUIRED)
+find_package(MPI REQUIRED)
 
-target_link_libraries(DSI-Project PRIVATE llama ggml OpenMP::OpenMP_CXX)
+target_link_libraries(DSI-Project PRIVATE llama ggml OpenMP::OpenMP_CXX MPI::MPI_CXX)

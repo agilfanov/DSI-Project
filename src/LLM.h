@@ -45,6 +45,8 @@ public:
 
 private:
 
+    static void fill_batch_at(const llama_batch& batch, const int index, const int tkn_id, const int pos, const bool needs_logits);
+
     llama_model* model;
     llama_context* ctx;
     const llama_vocab* vocab;

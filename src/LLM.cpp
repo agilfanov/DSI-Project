@@ -23,7 +23,7 @@ LLM::LLM(const std::string& model_gguf_path) {
     sz_vocab = llama_vocab_n_tokens(vocab);
 
     llama_context_params ctx_params = llama_context_default_params();
-    ctx_params.n_ctx   = LLM_CONTEXT_SIZE;
+    ctx_params.n_ctx = LLM_CONTEXT_SIZE;
     ctx_params.n_batch = LLM_BATCH_SIZE;
     ctx = llama_init_from_model(model, ctx_params);
 }
@@ -33,8 +33,7 @@ std::vector<int> LLM::tokenize_string(const std::string &text) const {
 
     /* Using text.size() for the n_tokens_max as can't be more tokens than characters in the string itself */
     std::vector<int> tokens(text.size());
-    int n = llama_tokenize(vocab, text.c_str(), text.size(),
-                           tokens.data(), tokens.size(), false, true);
+    const int n = llama_tokenize(vocab, text.c_str(), static_cast<int>(text.size()),tokens.data(), static_cast<int>(tokens.size()), false, true);
     tokens.resize(n);
     return tokens;
 }
@@ -58,7 +57,7 @@ std::unique_ptr<std::vector<float>> LLM::get_tkn_probabilities() const {
 }
 
 std::pair<int, float> LLM::choose_token_and_its_prob(const std::unique_ptr<std::vector<float>>& probabilities) const {
-    float r = Math::random_float();
+    const float r = Math::random_float();
     float cumulative = 0.0f;
     for (int i = 0; i < sz_vocab; i++) {
         cumulative += (*probabilities)[i];
@@ -67,16 +66,42 @@ std::pair<int, float> LLM::choose_token_and_its_prob(const std::unique_ptr<std::
     return {sz_vocab - 1, (*probabilities)[sz_vocab - 1]};
 }
 
-void LLM::wipe_last_n_tkns(int n) {
-
+void LLM::wipe_last_n_tkns(const int n) {
+    const int wipe_from = kv_ind - n;
+    llama_memory_seq_rm(llama_get_memory(ctx), 0, wipe_from, kv_ind);
+    kv_ind = wipe_from;
 }
 
-void LLM::add_tkn(int tkn_id) {
+void LLM::fill_batch_at(const llama_batch& batch, const int index, const int tkn_id, const int pos, const bool needs_logits) {
+    batch.token[index] = tkn_id;
+    batch.pos[index] = pos;
+    batch.n_seq_id[index] = 1;
+    batch.seq_id[index][0] = 0;
+    batch.logits[index] = needs_logits ? 1 : 0;
+}
 
+void LLM::add_tkn(const int tkn_id) {
+    llama_batch batch = llama_batch_init(1, 0, 1);
+    fill_batch_at(batch, 0, tkn_id, kv_ind, true);
+    batch.n_tokens = 1;
+
+    llama_decode(ctx, batch);
+    llama_batch_free(batch);
+    kv_ind++;
 }
 
 void LLM::add_tkns(const std::vector<int>& tkn_ids) {
+    const int count = static_cast<int>(tkn_ids.size());
+    llama_batch batch = llama_batch_init(count, 0, 1);
 
+    for (int i = 0; i < count; i++) {
+        fill_batch_at(batch, i, tkn_ids[i], kv_ind + i, i == count - 1);
+    }
+    batch.n_tokens = count;
+
+    llama_decode(ctx, batch);
+    llama_batch_free(batch);
+    kv_ind += count;
 }
 
 LLM::~LLM() {
