@@ -3,3 +3,7 @@
 //
 
 #include "Drafter.h"
+
+void Drafter::run() {
+
+}

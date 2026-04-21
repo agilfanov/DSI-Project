@@ -5,18 +5,16 @@
 #ifndef DSI_PROJECT_DRAFTER_H
 #define DSI_PROJECT_DRAFTER_H
 
+#include "../process.h"
 
-class Drafter {
+class Drafter : public Process {
 
 public:
-
-
-
-
+    explicit Drafter(const int rank) : Process(ProcessRole::DRAFTER, rank) {}
+    void run() override;
 
 private:
 
-    
 
 
 };

@@ -20,16 +20,20 @@ link_directories(/opt/homebrew/lib)
 link_directories(/opt/homebrew/opt/llvm/lib)
 
 add_executable(DSI-Project
-        src/llm.cpp
-        src/llm.h
+        src/llm/LLM.cpp
+        src/llm/LLM.h
         src/utilities/math.cpp
         src/utilities/math.h
-        src/handling/Drafter.cpp
-        src/handling/Drafter.h
-        src/handling/Reviewer.cpp
-        src/handling/Reviewer.h
+        src/processes/handlers/Drafter.cpp
+        src/processes/handlers/Drafter.h
+        src/processes/handlers/Target.cpp
+        src/processes/handlers/Target.h
         src/main.cpp
-        src/constants.h)
+        src/constants.h
+        src/processes/handlers/Orchestrator.cpp
+        src/processes/handlers/Orchestrator.h
+        src/processes/process.cpp
+        src/processes/process.h)
 
 find_package(OpenMP REQUIRED)
 find_package(MPI REQUIRED)

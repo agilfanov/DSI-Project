@@ -2,36 +2,38 @@
 // Created by Arthur Gilfanov on 4/13/26.
 //
 
-#include <iostream>
-#include "LLM.h"
+#include <memory>
 #include <mpi.h>
 
-int main() {
+#include "processes/process.h"
+#include "processes/handlers/Drafter.h"
+#include "processes/handlers/Orchestrator.h"
+#include "processes/handlers/Target.h"
 
-    /* This is just to test MPI*/
+int main(int argc, char** argv) {
 
-    MPI_Init(NULL, NULL);
+    MPI_Init(&argc, &argv);
 
-    // Get the number of processes
-    int world_size;
+    int world_size, world_rank;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-
-    // Get the rank of the process
-    int world_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
-    // Get the name of the processor
-    char processor_name[MPI_MAX_PROCESSOR_NAME];
-    int name_len;
-    MPI_Get_processor_name(processor_name, &name_len);
+    if (world_size < 3) {
+        throw std::runtime_error("World size must be at least 3 as a Drafter, Orchestrator, and Target process are required.");
+    }
 
-    // Print off a hello world message
-    printf("Hello world from processor %s, rank %d out of %d processors\n",
-           processor_name, world_rank, world_size);
+    /*
+     * Need one orchestrator and one drafter, following this every process
+     * is an additional target to help with drafter token review
+     */
+    std::unique_ptr<Process> process;
+    switch (world_rank) {
+        case 0: process = std::make_unique<Orchestrator>(world_rank); break;
+        case 1: process = std::make_unique<Drafter>(world_rank); break;
+        default: process = std::make_unique<Target>(world_rank); break;
+    }
+    process->run();
 
-    // Finalize the MPI environment.
     MPI_Finalize();
-
-
     return 0;
 }

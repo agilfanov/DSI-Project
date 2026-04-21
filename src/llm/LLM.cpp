@@ -1,10 +1,10 @@
 //
 // Created by Arthur Gilfanov on 4/12/26.
 //
-#include "LLM.h"
-#include "constants.h"
+#include "../LLM.h"
+#include "../constants.h"
 #include "ggml-backend.h"
-#include "utilities/Math.h"
+#include "../utilities/Math.h"
 
 LLM::LLM(const std::string& model_gguf_path) {
     model = nullptr;
