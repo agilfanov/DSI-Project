@@ -1,16 +1,18 @@
 //
 // Created by Arthur Gilfanov on 4/12/26.
 //
-#include "../LLM.h"
+#include "./LLM.h"
 #include "../constants.h"
 #include "ggml-backend.h"
 #include "../utilities/Math.h"
 
-LLM::LLM(const std::string& model_gguf_path) {
+LLM::LLM(const std::string& model_gguf_path, std::unique_ptr<EvictionKV> eviction)
+    : eviction(std::move(eviction)) {
     model = nullptr;
     ctx = nullptr;
     vocab = nullptr;
-    kv_ind = 0;
+    next_pos = 0;
+    n_cached = 0;
 
     llama_backend_init();
     ggml_backend_load_all();
@@ -47,29 +49,22 @@ std::string LLM::tkn_id_to_str(const int tkn_id) const {
 }
 
 
-std::unique_ptr<std::vector<float>> LLM::get_tkn_probabilities() const {
-    if (kv_ind == 0) return nullptr;
-
-    float* logits = llama_get_logits_ith(ctx, -1);
-    auto raw_probabilities = std::make_unique<std::vector<float>>(logits, logits + sz_vocab);
-    Math::parallel_softmax(*raw_probabilities);
-    return raw_probabilities;
-}
-
-std::pair<int, float> LLM::choose_token_and_its_prob(const std::unique_ptr<std::vector<float>>& probabilities) const {
+std::pair<int, float> LLM::choose_token_and_its_prob(const std::vector<float>& probabilities) const {
     const float r = Math::random_float();
     float cumulative = 0.0f;
     for (int i = 0; i < sz_vocab; i++) {
-        cumulative += (*probabilities)[i];
-        if (r <= cumulative) return {i, (*probabilities)[i]};
+        cumulative += probabilities[i];
+        if (r <= cumulative) return {i, probabilities[i]};
     }
-    return {sz_vocab - 1, (*probabilities)[sz_vocab - 1]};
+    return {sz_vocab - 1, probabilities[sz_vocab - 1]};
 }
 
+/* Removes the last n added elements to the kv_cache [n most recent] */
 void LLM::wipe_last_n_tkns(const int n) {
-    const int wipe_from = kv_ind - n;
-    llama_memory_seq_rm(llama_get_memory(ctx), 0, wipe_from, kv_ind);
-    kv_ind = wipe_from;
+    const int wipe_from = next_pos - n;
+    llama_memory_seq_rm(llama_get_memory(ctx), 0, wipe_from, next_pos);
+    next_pos = wipe_from;
+    n_cached -= n;
 }
 
 void LLM::fill_batch_at(const llama_batch& batch, const int index, const int tkn_id, const int pos, const bool needs_logits) {
@@ -80,28 +75,34 @@ void LLM::fill_batch_at(const llama_batch& batch, const int index, const int tkn
     batch.logits[index] = needs_logits ? 1 : 0;
 }
 
-void LLM::add_tkn(const int tkn_id) {
-    llama_batch batch = llama_batch_init(1, 0, 1);
-    fill_batch_at(batch, 0, tkn_id, kv_ind, true);
-    batch.n_tokens = 1;
-
-    llama_decode(ctx, batch);
-    llama_batch_free(batch);
-    kv_ind++;
+void LLM::ensure_kv_capacity(const int n) {
+    if (n_cached + n <= LLM_CONTEXT_SIZE) return;
+    n_cached -= eviction->evict(llama_get_memory(ctx), n);
 }
 
-void LLM::add_tkns(const std::vector<int>& tkn_ids) {
+std::vector<std::vector<float>> LLM::add_tkns(const std::vector<int>& tkn_ids, const bool only_last_logit) {
     const int count = static_cast<int>(tkn_ids.size());
+    ensure_kv_capacity(count);
     llama_batch batch = llama_batch_init(count, 0, 1);
 
     for (int i = 0; i < count; i++) {
-        fill_batch_at(batch, i, tkn_ids[i], kv_ind + i, i == count - 1);
+        fill_batch_at(batch, i, tkn_ids[i], next_pos + i, !only_last_logit || i == count - 1);
     }
     batch.n_tokens = count;
 
     llama_decode(ctx, batch);
     llama_batch_free(batch);
-    kv_ind += count;
+    next_pos += count;
+    n_cached += count;
+
+    const int n_logits = only_last_logit ? 1 : count;
+    std::vector<std::vector<float>> fetched_logits(n_logits, std::vector<float>(sz_vocab));
+
+    for (int i = 0; i < n_logits; i++) {
+        float* logits = llama_get_logits_ith(ctx, i);
+        std::copy_n(logits, sz_vocab, fetched_logits[i].begin());
+    }
+    return fetched_logits;
 }
 
 LLM::~LLM() {

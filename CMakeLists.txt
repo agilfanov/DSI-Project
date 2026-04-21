@@ -33,7 +33,10 @@ add_executable(DSI-Project
         src/processes/handlers/Orchestrator.cpp
         src/processes/handlers/Orchestrator.h
         src/processes/process.cpp
-        src/processes/process.h)
+        src/processes/process.h
+        src/llm/eviction/SlidingWindow.h
+        src/llm/eviction/EvictionKV.h
+)
 
 find_package(OpenMP REQUIRED)
 find_package(MPI REQUIRED)
