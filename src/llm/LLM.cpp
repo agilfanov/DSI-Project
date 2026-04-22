@@ -10,7 +10,6 @@ LLM::LLM(const std::string& model_gguf_path, std::unique_ptr<EvictionKV> evictio
     : eviction(std::move(eviction)) {
     model = nullptr;
     ctx = nullptr;
-    vocab = nullptr;
     next_pos = 0;
     n_cached = 0;
 
@@ -21,8 +20,8 @@ LLM::LLM(const std::string& model_gguf_path, std::unique_ptr<EvictionKV> evictio
     model_params.n_gpu_layers = LLM_GPU_LAYERS;
     model = llama_model_load_from_file(model_gguf_path.c_str(), model_params);
 
-    vocab = llama_model_get_vocab(model);
-    sz_vocab = llama_vocab_n_tokens(vocab);
+    tokenizer = std::make_unique<Tokenizer>(llama_model_get_vocab(model));
+    sz_vocab = tokenizer->get_sz_vocab();
 
     llama_context_params ctx_params = llama_context_default_params();
     ctx_params.n_ctx = LLM_CONTEXT_SIZE;
@@ -30,23 +29,6 @@ LLM::LLM(const std::string& model_gguf_path, std::unique_ptr<EvictionKV> evictio
     ctx = llama_init_from_model(model, ctx_params);
 }
 
-
-std::vector<int> LLM::tokenize_string(const std::string &text) const {
-
-    /* Using text.size() for the n_tokens_max as can't be more tokens than characters in the string itself */
-    std::vector<int> tokens(text.size());
-    const int n = llama_tokenize(vocab, text.c_str(), static_cast<int>(text.size()),tokens.data(), static_cast<int>(tokens.size()), false, true);
-    tokens.resize(n);
-    return tokens;
-}
-
-
-std::string LLM::tkn_id_to_str(const int tkn_id) const {
-    constexpr int buffer_sz = 256;
-    char buf[buffer_sz];
-    size_t len = llama_token_to_piece(vocab, tkn_id, buf, sizeof(buf), 0, true);
-    return {buf, len};
-}
 
 
 std::pair<int, float> LLM::choose_token_and_its_prob(const std::vector<float>& probabilities) const {

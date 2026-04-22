@@ -35,7 +35,14 @@ add_executable(DSI-Project
         src/processes/process.cpp
         src/processes/process.h
         src/llm/eviction/SlidingWindow.h
+        src/llm/eviction/SlidingWindow.cpp
         src/llm/eviction/EvictionKV.h
+        src/llm/Tokenizer.h
+        src/llm/Tokenizer.cpp
+        src/ui/UI.h
+        src/ui/UI.cpp
+        src/ui/cli/CLI.h
+        src/ui/cli/CLI.cpp
 )
 
 find_package(OpenMP REQUIRED)
