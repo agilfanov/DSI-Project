@@ -2,7 +2,6 @@
 // Created by Arthur Gilfanov on 4/12/26.
 //
 #include "./LLM.h"
-#include "../constants.h"
 #include "ggml-backend.h"
 #include "../utilities/Math.h"
 
@@ -17,15 +16,14 @@ LLM::LLM(const std::string& model_gguf_path, std::unique_ptr<EvictionKV> evictio
     ggml_backend_load_all();
 
     llama_model_params model_params = llama_model_default_params();
-    model_params.n_gpu_layers = LLM_GPU_LAYERS;
+    model_params.n_gpu_layers = GPU_LAYERS;
     model = llama_model_load_from_file(model_gguf_path.c_str(), model_params);
 
-    tokenizer = std::make_unique<Tokenizer>(llama_model_get_vocab(model));
-    sz_vocab = tokenizer->get_sz_vocab();
+    sz_vocab = llama_vocab_n_tokens(llama_model_get_vocab(model));
 
     llama_context_params ctx_params = llama_context_default_params();
-    ctx_params.n_ctx = LLM_CONTEXT_SIZE;
-    ctx_params.n_batch = LLM_BATCH_SIZE;
+    ctx_params.n_ctx = CONTEXT_SIZE;
+    ctx_params.n_batch = BATCH_SIZE;
     ctx = llama_init_from_model(model, ctx_params);
 }
 
@@ -58,7 +56,7 @@ void LLM::fill_batch_at(const llama_batch& batch, const int index, const int tkn
 }
 
 void LLM::ensure_kv_capacity(const int n) {
-    if (n_cached + n <= LLM_CONTEXT_SIZE) return;
+    if (n_cached + n <= CONTEXT_SIZE) return;
     n_cached -= eviction->evict(llama_get_memory(ctx), n);
 }
 

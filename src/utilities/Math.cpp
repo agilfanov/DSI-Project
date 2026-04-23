@@ -3,7 +3,7 @@
 //
 
 #include "Math.h"
-#include "../constants.h"
+#include "../omp_config.h"
 #include <cmath>
 #include <omp.h>
 

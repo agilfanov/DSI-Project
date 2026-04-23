@@ -8,7 +8,8 @@
 class Tokenizer {
 
 public:
-    explicit Tokenizer(const llama_vocab* vocab);
+    explicit Tokenizer(const std::string& model_gguf_path);
+    ~Tokenizer();
 
     std::vector<int> tokenize_string(const std::string& text) const;
 
@@ -17,6 +18,7 @@ public:
     int get_sz_vocab() const;
 
 private:
+    llama_model* model;
     const llama_vocab* vocab;
     int sz_vocab;
 

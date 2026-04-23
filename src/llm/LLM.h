@@ -8,13 +8,16 @@
 #include <vector>
 #include <memory>
 #include "llama.h"
-#include "Tokenizer.h"
 #include "eviction/EvictionKV.h"
 
 
 class LLM {
 
 public:
+
+    static constexpr int CONTEXT_SIZE = 4096;
+    static constexpr int BATCH_SIZE = 512;
+    static constexpr int GPU_LAYERS = 99;
 
     LLM(const std::string& model_gguf_path, std::unique_ptr<EvictionKV> eviction);
 
@@ -42,7 +45,6 @@ private:
     int next_pos;  /* next logical position for RoPE, monotonically increasing */
     int n_cached;  /* number of occupied cells in the KV cache */
     int sz_vocab;
-    std::unique_ptr<Tokenizer> tokenizer;
     std::unique_ptr<EvictionKV> eviction;
 
 

@@ -1,7 +1,16 @@
 #include "Tokenizer.h"
 
-Tokenizer::Tokenizer(const llama_vocab* vocab)
-    : vocab(vocab), sz_vocab(llama_vocab_n_tokens(vocab)) {}
+Tokenizer::Tokenizer(const std::string& model_gguf_path) {
+    llama_model_params params = llama_model_default_params();
+    params.vocab_only = true;
+    model = llama_model_load_from_file(model_gguf_path.c_str(), params);
+    vocab = llama_model_get_vocab(model);
+    sz_vocab = llama_vocab_n_tokens(vocab);
+}
+
+Tokenizer::~Tokenizer() {
+    if (model) llama_model_free(model);
+}
 
 std::vector<int> Tokenizer::tokenize_string(const std::string& text) const {
     std::vector<int> tokens(text.size());

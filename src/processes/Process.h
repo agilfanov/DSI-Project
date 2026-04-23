@@ -5,7 +5,7 @@
 #ifndef DSI_PROJECT_PROCESS_H
 #define DSI_PROJECT_PROCESS_H
 
-#include "../constants.h"
+enum class ProcessRole { ORCHESTRATOR, DRAFTER, TARGET };
 
 class Process {
 
