@@ -43,6 +43,9 @@ add_executable(DSI-Project
         src/ui/cli/CLI.h
         src/ui/cli/CLI.cpp
         src/comm/Comm.h
+        src/comm/Comm.cpp
+        src/comm/Protocol.h
+        src/comm/Protocol.cpp
 )
 
 find_package(OpenMP REQUIRED)

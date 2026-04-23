@@ -19,7 +19,7 @@ public:
 
 protected:
     ProcessRole role;
-    int rank;
+    int rank; /* rank is essentially unique id */
 
 };
 
