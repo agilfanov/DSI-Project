@@ -29,7 +29,6 @@ add_executable(DSI-Project
         src/processes/handlers/Target.cpp
         src/processes/handlers/Target.h
         src/main.cpp
-        src/constants.h
         src/processes/handlers/Orchestrator.cpp
         src/processes/handlers/Orchestrator.h
         src/processes/process.cpp
@@ -43,6 +42,7 @@ add_executable(DSI-Project
         src/ui/UI.cpp
         src/ui/cli/CLI.h
         src/ui/cli/CLI.cpp
+        src/comm/Comm.h
 )
 
 find_package(OpenMP REQUIRED)
