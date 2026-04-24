@@ -5,7 +5,7 @@
 #ifndef DSI_PROJECT_PROCESS_H
 #define DSI_PROJECT_PROCESS_H
 
-enum class ProcessRole { ORCHESTRATOR, DRAFTER, TARGET };
+enum class ProcessRole { FRONTEND, ORCHESTRATOR, DRAFTER, TARGET };
 
 class Process {
 

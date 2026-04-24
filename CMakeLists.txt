@@ -40,10 +40,10 @@ add_executable(DSI-Project
         src/llm/eviction/EvictionKV.h
         src/llm/Tokenizer.h
         src/llm/Tokenizer.cpp
-        src/ui/UI.h
-        src/ui/UI.cpp
-        src/ui/cli/CLI.h
-        src/ui/cli/CLI.cpp
+        src/processes/handlers/frontend/Frontend.h
+        src/processes/handlers/frontend/Frontend.cpp
+        src/session/Session.h
+        src/session/Session.cpp
         src/comm/Comm.h
         src/comm/Comm.cpp
         src/comm/Protocol.h
