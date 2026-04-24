@@ -6,7 +6,7 @@
 #define DSI_PROJECT_PROTOCOL_H
 
 enum class MsgTag {
-    TERMINATE,
+    PAUSE,
     
 
 };

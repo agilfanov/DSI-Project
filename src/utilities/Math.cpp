@@ -80,7 +80,7 @@ void Math::parallel_softmax(std::vector<float>& vec) {
         sum += data[i];
     }
 
-    /* Normalize to get probabilities */
+    /* Use denom to get 0 - 1 values normalized */
     #pragma omp parallel for simd
     for (int i = 0; i < n; i++) {
         data[i] /= sum;

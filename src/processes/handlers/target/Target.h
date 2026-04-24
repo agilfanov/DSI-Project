@@ -6,7 +6,7 @@
 #define DSI_PROJECT_TARGET_H
 
 #include <string>
-#include "../process.h"
+#include "../../process.h"
 
 class Target : public Process {
 

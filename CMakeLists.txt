@@ -22,17 +22,19 @@ link_directories(/opt/homebrew/opt/llvm/lib)
 add_executable(DSI-Project
         src/llm/LLM.cpp
         src/llm/LLM.h
-        src/utilities/math.cpp
-        src/utilities/math.h
-        src/processes/handlers/Drafter.cpp
-        src/processes/handlers/Drafter.h
-        src/processes/handlers/Target.cpp
-        src/processes/handlers/Target.h
+        src/utilities/Math.cpp
+        src/utilities/Math.h
+        src/processes/handlers/drafter/Drafter.cpp
+        src/processes/handlers/drafter/Drafter.h
+        src/processes/handlers/target/Target.cpp
+        src/processes/handlers/target/Target.h
         src/main.cpp
-        src/processes/handlers/Orchestrator.cpp
-        src/processes/handlers/Orchestrator.h
-        src/processes/process.cpp
-        src/processes/process.h
+        src/processes/handlers/orchestrator/Orchestrator.cpp
+        src/processes/handlers/orchestrator/Orchestrator.h
+        src/processes/handlers/orchestrator/VerificationPool.h
+        src/processes/handlers/orchestrator/VerificationPool.cpp
+        src/processes/Process.cpp
+        src/processes/Process.h
         src/llm/eviction/SlidingWindow.h
         src/llm/eviction/SlidingWindow.cpp
         src/llm/eviction/EvictionKV.h

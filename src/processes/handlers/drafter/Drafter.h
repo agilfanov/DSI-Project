@@ -6,7 +6,7 @@
 #define DSI_PROJECT_DRAFTER_H
 
 #include <string>
-#include "../process.h"
+#include "../../process.h"
 
 class Drafter : public Process {
 

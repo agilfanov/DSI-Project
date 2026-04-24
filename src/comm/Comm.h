@@ -28,16 +28,12 @@ public:
         MPI_Get_count(&status, mpi_type<T>(), &count);
 
         std::vector<T> data(count);
-        MPI_Recv(data.data(), count, mpi_type<T>(),
-                 source, tag_to_int(tag), MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(data.data(), count, mpi_type<T>(), source, tag_to_int(tag), MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         return data;
     }
 
-    template<typename T>
-    static void broadcast(std::vector<T>& data, const int source) {
-        MPI_Bcast(data.data(), static_cast<int>(data.size()), mpi_type<T>(),
-                  source, MPI_COMM_WORLD);
-    }
+    /* first is rank of who sent it, second is tag */
+    static std::pair<int, MsgTag> probe_any();
 
     static void barrier();
 

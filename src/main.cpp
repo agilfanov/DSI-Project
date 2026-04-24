@@ -6,9 +6,9 @@
 #include <mpi.h>
 
 #include "processes/process.h"
-#include "processes/handlers/Drafter.h"
-#include "processes/handlers/Orchestrator.h"
-#include "processes/handlers/Target.h"
+#include "processes/handlers/drafter/Drafter.h"
+#include "processes/handlers/orchestrator/Orchestrator.h"
+#include "processes/handlers/target/Target.h"
 
 int main(int argc, char** argv) {
 
@@ -19,14 +19,14 @@ int main(int argc, char** argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
     if (argc < 3) {
-        throw std::runtime_error("Usage: DSI-Project <drafter_gguf_path> <target_gguf_path>");
+        throw std::runtime_error("Format for input needs to be DSI-Project drafter_gguf_path target_gguf_path");
     }
 
     const std::string drafter_path = argv[1];
     const std::string target_path = argv[2];
 
     if (world_size < 3) {
-        throw std::runtime_error("World size must be at least 3 as a Drafter, Orchestrator, and Target process are required.");
+        throw std::runtime_error("World size must be at least 3 as a Drafter, Orchestrator, and Target process need");
     }
 
     /*
