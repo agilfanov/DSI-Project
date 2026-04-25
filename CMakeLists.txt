@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.14)
-project(DSI-Project)
-
-set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_C_COMPILER "/opt/homebrew/opt/llvm/bin/clang")
 set(CMAKE_CXX_COMPILER "/opt/homebrew/opt/llvm/bin/clang++")
+
+project(DSI-Project)
+
+set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_PREFIX_PATH "/opt/homebrew/opt/llvm")
 
@@ -44,13 +45,27 @@ add_executable(DSI-Project
         src/processes/handlers/frontend/Frontend.cpp
         src/session/Session.h
         src/session/Session.cpp
+        src/chat/TUI.h
+        src/chat/TUI.cpp
         src/comm/Comm.h
         src/comm/Comm.cpp
         src/comm/Protocol.h
         src/comm/Protocol.cpp
 )
 
+include(FetchContent)
+FetchContent_Declare(
+        ftxui
+        GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
+        GIT_TAG v6.1.9
+)
+FetchContent_MakeAvailable(ftxui)
+
 find_package(OpenMP REQUIRED)
 find_package(MPI REQUIRED)
 
-target_link_libraries(DSI-Project PRIVATE llama ggml OpenMP::OpenMP_CXX MPI::MPI_CXX)
+target_link_libraries(DSI-Project PRIVATE
+        llama ggml
+        OpenMP::OpenMP_CXX MPI::MPI_CXX
+        ftxui::screen ftxui::dom ftxui::component
+)

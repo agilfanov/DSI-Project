@@ -11,7 +11,9 @@
 
 class Comm {
 
-public:
+    friend class Process;
+
+private:
 
     template<typename T>
     static void send(const std::vector<T>& data, const int dest, const MsgTag tag) {
